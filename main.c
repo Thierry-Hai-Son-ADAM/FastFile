@@ -8,7 +8,10 @@ int main(void) {
 	//a file descriptor is returned after creating a TCP socket
 	int socket_fd = socket(AF_INET , SOCK_STREAM , 0);
 
-	printf("Socket ressource file descriptor number is %d\n", socket_fd);
+	if (socket_fd == -1) {
+		perror("socket");
+		return 1;
+	}
 
 	//Instantiating a sockaddr_in struct using internet socket adress
 	struct sockaddr_in server_addr = {0};
@@ -22,10 +25,9 @@ int main(void) {
 		return 1;
 	}
 	else if (inet_pton_ret_val == 0) {
-		printf("src does not contain a character string representing a valid network "
-			"address in the specified address family"); //from man doc
-			close(socket_fd);
-			return 1;
+		fprintf(stderr, "Invalid ip address\n");
+		close(socket_fd);
+		return 1;
 	}
 
 	server_addr.sin_family = AF_INET;
@@ -40,9 +42,27 @@ int main(void) {
 		close(socket_fd);
 		return 1;
 	}
+
+	int listen_val = listen(socket_fd, 0);
+
+	if (socket_fd == -1) {
+		perror("listen");
+		close(socket_fd);
+		return 1;
+	}
+	struct sockaddr_in client_addr = {0};
 	
+	int client_socket_fd = accept(socket_fd, (struct sockaddr *) &client_addr, (socklen_t *) &client_addr);
+	if (client_socket_fd == -1) {
+		perror("accept");
+		close(socket_fd);
+		close(client_socket_fd);
+		return 1;
+	}
+
 	close(socket_fd);
-	
+	close(client_socket_fd);
+
 	return 0;
 
 }
