@@ -45,20 +45,28 @@ int main(void) {
 
 	int listen_val = listen(socket_fd, 0);
 
-	if (socket_fd == -1) {
+	if (listen_val == -1) {
 		perror("listen");
 		close(socket_fd);
 		return 1;
 	}
 	struct sockaddr_in client_addr = {0};
+
+	socklen_t client_addr_size = sizeof(client_addr);
 	
-	int client_socket_fd = accept(socket_fd, (struct sockaddr *) &client_addr, (socklen_t *) &client_addr);
+	int client_socket_fd = accept(socket_fd, (struct sockaddr *) &client_addr, &client_addr_size);
 	if (client_socket_fd == -1) {
 		perror("accept");
 		close(socket_fd);
-		close(client_socket_fd);
 		return 1;
 	}
+
+	char ip_address_client[INET_ADDRSTRLEN];
+
+	inet_ntop(AF_INET, &client_addr.sin_addr, ip_address_client, sizeof(ip_address_client));
+
+	printf("client_addr_size %u bytes\n", client_addr_size);
+	printf("client_addr ip address: %s\n", ip_address_client);
 
 	close(socket_fd);
 	close(client_socket_fd);
