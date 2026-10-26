@@ -60,6 +60,7 @@ int main(void) {
 		close(socket_fd);
 		return 1;
 	}
+	
 
 	char ip_address_client[INET_ADDRSTRLEN];
 
@@ -67,6 +68,19 @@ int main(void) {
 
 	printf("client_addr_size %u bytes\n", client_addr_size);
 	printf("client_addr ip address: %s\n", ip_address_client);
+
+	char msg[] = "I'm using the standardized POSIX interface implemented by the kernel of this OS"
+	"(Ubuntu) which is Linux to send this message";
+
+	int send_nb_bytes = send(client_socket_fd, &msg, sizeof(msg), MSG_NOSIGNAL);
+	if (send_nb_bytes == -1) {
+		perror("send");
+		close(socket_fd);
+		close(client_socket_fd);
+		return 1;
+	}
+
+	printf("send() number of bytes sent: %d\n", send_nb_bytes);
 
 	close(socket_fd);
 	close(client_socket_fd);
